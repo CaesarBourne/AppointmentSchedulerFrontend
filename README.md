@@ -33,6 +33,8 @@ The system allows:
 - **State Management**: React Query
 - **Backend**: REST API (Symfony, hosted on EC2)
 
+**Live Frontend Domain** - http://51.20.183.50:5173/
+
 ## 📦 Setup
 
 1. Clone the repository
