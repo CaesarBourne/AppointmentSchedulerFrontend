@@ -9,9 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-
-import { type Appointment, type NewAppointment } from "@/models/Appointment";
+import { type NewAppointment, type Appointment } from "@/models/Appointment";
 import { type Participant } from "@/models/Participant";
 import { toast } from "sonner";
 import {
@@ -39,78 +37,51 @@ export default function AppointmentForm({
   participants,
   onCancel,
 }: AppointmentFormProps) {
-  const [title, setTitle] = useState(initialAppointment?.title || "");
-  const [description, setDescription] = useState(
-    initialAppointment?.description || ""
-  );
-  const formatDateForInput = (date: Date): string => {
-    return date.toISOString().split("T")[0];
-  };
-
-  const formatTimeForInput = (date: Date): string => {
-    return date.toTimeString().substring(0, 5);
-  };
-
   const [startDate, setStartDate] = useState(
     initialAppointment
-      ? formatDateForInput(new Date(initialAppointment.startTime))
+      ? new Date(initialAppointment.startTime).toISOString().split("T")[0]
       : ""
   );
   const [startTime, setStartTime] = useState(
     initialAppointment
-      ? formatTimeForInput(new Date(initialAppointment.startTime))
+      ? new Date(initialAppointment.startTime).toTimeString().substring(0, 5)
       : ""
   );
   const [endDate, setEndDate] = useState(
     initialAppointment
-      ? formatDateForInput(new Date(initialAppointment.endTime))
+      ? new Date(initialAppointment.endTime).toISOString().split("T")[0]
       : ""
   );
   const [endTime, setEndTime] = useState(
     initialAppointment
-      ? formatTimeForInput(new Date(initialAppointment.endTime))
+      ? new Date(initialAppointment.endTime).toTimeString().substring(0, 5)
       : ""
   );
-  const [selectedParticipants, setSelectedParticipants] = useState<number[]>(
-    initialAppointment ? initialAppointment.participants.map((p) => p.id) : []
-  );
+
+  const [selectedParticipantId, setSelectedParticipantId] = useState<
+    number | null
+  >(initialAppointment ? initialAppointment.participant.id : null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
-    if (!title.trim()) {
-      toast.error("Title is required", {
-        description: "Validation Error",
-      });
-      return;
-    }
-
     if (!startDate || !startTime || !endDate || !endTime) {
-      toast.error("Validation Error", {
-        description: "Start and end date/time are required",
-      });
+      toast.error("Start and end date/time are required");
       return;
     }
 
-    if (selectedParticipants.length === 0) {
-      toast.error("Validation error", {
-        description: "Please select at least one participant",
-      });
+    if (!selectedParticipantId) {
+      toast.error("Please select a participant");
       return;
     }
 
-    // Combine date and time strings to create ISO date strings
     const startDateTime = new Date(`${startDate}T${startTime}`);
     const endDateTime = new Date(`${endDate}T${endTime}`);
 
-    // Validate that end time is after start time
     if (endDateTime <= startDateTime) {
-      toast.error("Validation Error", {
-        description: "End time must be after start time",
-      });
-
+      toast.error("End time must be after start time");
       return;
     }
 
@@ -118,40 +89,26 @@ export default function AppointmentForm({
 
     try {
       const appointmentData: NewAppointment = {
-        title,
-        description,
         startTime: startDateTime.toISOString(),
         endTime: endDateTime.toISOString(),
-        participantIds: selectedParticipants,
+        participantId: selectedParticipantId,
       };
 
       await onSubmit(appointmentData);
 
-      // Reset form if creating a new appointment
+      // Reset form if creating new
       if (!initialAppointment) {
-        setTitle("");
-        setDescription("");
         setStartDate("");
         setStartTime("");
         setEndDate("");
         setEndTime("");
-        setSelectedParticipants([]);
+        setSelectedParticipantId(null);
       }
     } catch {
-      toast.error("Error", {
-        description: "Failed to save appointment",
-      });
+      toast.error("Failed to save appointment");
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const toggleParticipant = (participantId: number) => {
-    setSelectedParticipants((current) =>
-      current.includes(participantId)
-        ? current.filter((id) => id !== participantId)
-        : [...current, participantId]
-    );
   };
 
   return (
@@ -163,26 +120,6 @@ export default function AppointmentForm({
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Meeting title"
-              disabled={isSubmitting}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="description">Description (Optional)</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Meeting details"
-              disabled={isSubmitting}
-            />
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="startDate">Start Date</Label>
@@ -228,8 +165,9 @@ export default function AppointmentForm({
               />
             </div>
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="participants">Participants</Label>
+            <Label htmlFor="participant">Participant</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -237,9 +175,10 @@ export default function AppointmentForm({
                   role="combobox"
                   className="w-full justify-between"
                 >
-                  {selectedParticipants.length > 0
-                    ? `${selectedParticipants.length} selected`
-                    : "Select participants"}
+                  {selectedParticipantId
+                    ? participants.find((p) => p.id === selectedParticipantId)
+                        ?.name
+                    : "Select a participant"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
@@ -250,13 +189,15 @@ export default function AppointmentForm({
                       <CommandItem
                         key={participant.id}
                         value={participant.name}
-                        onSelect={() => toggleParticipant(participant.id)}
+                        onSelect={() =>
+                          setSelectedParticipantId(participant.id)
+                        }
                       >
                         <div className="flex items-center justify-between w-full">
                           <span>
                             {participant.name} ({participant.email})
                           </span>
-                          {selectedParticipants.includes(participant.id) && (
+                          {selectedParticipantId === participant.id && (
                             <span className="text-primary font-medium">✓</span>
                           )}
                         </div>
@@ -269,7 +210,7 @@ export default function AppointmentForm({
           </div>
         </CardContent>
 
-        <CardFooter className="flex justify-between">
+        <CardFooter className="flex justify-between mt-4">
           {onCancel && (
             <Button
               variant="outline"
@@ -282,7 +223,7 @@ export default function AppointmentForm({
           )}
           <Button
             type="submit"
-            disabled={isSubmitting || participants.length === 0}
+            disabled={isSubmitting || !selectedParticipantId}
           >
             {isSubmitting
               ? "Saving..."

@@ -98,7 +98,7 @@ export default function ParticipantForm({
             />
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
+        <CardFooter className="flex justify-between mt-4">
           {onCancel && (
             <Button
               variant="outline"

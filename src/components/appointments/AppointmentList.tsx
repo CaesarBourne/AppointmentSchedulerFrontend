@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { type Appointment } from "@/models/Appointment";
 import { Edit, Trash, CalendarPlus } from "lucide-react";
-import { format } from "date-fns";
+import { format, differenceInMinutes } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,7 +63,9 @@ export default function AppointmentList({
           <Card key={appointment.id} className="appointment-card">
             <CardHeader>
               <div className="flex justify-between items-start">
-                <CardTitle className="mr-2">{appointment.title}</CardTitle>
+                <CardTitle className="mr-2">
+                  Meeting with {appointment.participant.name}
+                </CardTitle>
                 <div className="flex space-x-1">
                   <Button
                     variant="ghost"
@@ -84,8 +86,8 @@ export default function AppointmentList({
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete appointment</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete "{appointment.title}"?
-                          This action cannot be undone.
+                          Are you sure you want to delete this appointment with{" "}
+                          {appointment.participant.name}?
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -102,25 +104,27 @@ export default function AppointmentList({
                 </div>
               </div>
               <CardDescription className="flex flex-col gap-1">
-                <span>{formatDateTime(appointment.startTime)}</span>
+                <span>from {formatDateTime(appointment.startTime)}</span>
                 <span>to {formatDateTime(appointment.endTime)}</span>
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {appointment.description && (
-                <p className="text-sm text-muted-foreground mb-4">
-                  {appointment.description}
-                </p>
-              )}
+              <p className="text-sm text-muted-foreground mb-2">
+                This meeting is scheduled with {appointment.participant.name}{" "}
+                and meant to last for-
+                {(
+                  differenceInMinutes(
+                    new Date(appointment.endTime),
+                    new Date(appointment.startTime)
+                  ) / 60
+                ).toFixed(2)}
+                -hours.
+              </p>
               <div>
-                <h4 className="text-sm font-medium mb-2">Participants:</h4>
-                <div className="flex flex-wrap gap-1">
-                  {appointment.participants.map((participant) => (
-                    <Badge key={participant.id} variant="secondary">
-                      {participant.name}
-                    </Badge>
-                  ))}
-                </div>
+                <h4 className="text-sm font-medium mb-2">Participant</h4>
+                <Badge variant="secondary">
+                  {appointment.participant.name}
+                </Badge>
               </div>
             </CardContent>
           </Card>
