@@ -72,7 +72,7 @@ export default function AppointmentsPage() {
   };
 
   const handleEditAppointment = () => {
-    toast.info("Editing is not yet supported by the backend");
+    toast.info("Editing  feature is coming soon");
   };
 
   const isLoading = isLoadingAppointments || isLoadingParticipants;

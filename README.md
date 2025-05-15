@@ -1,54 +1,55 @@
-# React + TypeScript + Vite
+# 🗓️ Appointment Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a lightweight web-based appointment management tool designed for institutions (e.g., clinics or therapy centers) where individual therapists schedule one-on-one meetings with participants.
 
-Currently, two official plugins are available:
+## 🔍 Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The system allows:
 
-## Expanding the ESLint configuration
+- Creating participants with their name and email
+- Scheduling appointments between a single participant and a therapist
+- Viewing, listing, and deleting appointments and participants
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## ✅ Key Features
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- **Single Participant Per Appointment**: Each appointment is one-on-one, involving exactly one participant. This simplifies the scheduling logic and better reflects therapist–client interactions.
+- **No Overlapping Appointments for a Participant**: A participant cannot have two overlapping appointments, ensuring schedule integrity.
+- **Auto-Generated Titles and Descriptions**: Titles like `Meeting with John Doe` and descriptions like `Meeting with John Doe starts at 3:00 PM and ends at 4:00 PM` are auto-generated to minimize input errors and maintain consistency.
+- **Upcoming Appointments Dashboard**: The homepage summarizes upcoming meetings and key stats.
+- **Participant-First Scheduling**: Appointment creation is dependent on selecting an existing participant by email, aligning with real-world workflows where clients must be onboarded before meetings.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🔁 Appointment Flow Rationale
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. **Participant Created First**: Since each appointment is tied to an individual participant, users must first be added to the system with an email.
+2. **Appointment Tied to Email**: When creating an appointment, the participant’s email is used to match the correct individual server-side.
+3. **Auto Title & Description**: Reduces manual input for admins, and ensures all appointment records are easy to scan and understand.
+4. **Prevent Overlaps**: Backend ensures that a participant cannot be double-booked during overlapping times.
+5. **Simplified Backend API**: No editing functionality yet—appointments can only be created or deleted.
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## 🛠️ Tech Stack
+
+- **Frontend**: React + TypeScript
+- **Styling**: Tailwind CSS, ShadCN UI
+- **State Management**: React Query
+- **Backend**: REST API (Node.js/Express, hosted on EC2)
+
+## 📦 Setup
+
+1. Clone the repository
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Start the dev server:
+
+   ```bash
+   npm run dev
+   ```
+
+4. Ensure your `.env` or `api.ts` base URL points to the backend:
+
+   ```ts
+   const BASE_URL = "http://<your-backend-ip>:8000/api";
+   ```
