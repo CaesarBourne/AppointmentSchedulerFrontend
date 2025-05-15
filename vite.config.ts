@@ -10,14 +10,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  server: {
-    proxy: {
-      "/api": {
-        target: "http://13.60.172.81:8000",
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/api/, ""),
-      },
-    },
-  },
+  base: "/AppointmentSchedulerFrontend/",
+  // server: {
+  //   proxy: {
+  //     "/api": {
+  //       target: "http://13.60.172.81:8000",
+  //       changeOrigin: true,
+  //       secure: false,
+  //       rewrite: (path) => path.replace(/^\/api/, ""),
+  //     },
+  //   },
+  // },
 });
