@@ -31,7 +31,7 @@ The system allows:
 - **Frontend**: React + TypeScript
 - **Styling**: Tailwind CSS, ShadCN UI
 - **State Management**: React Query
-- **Backend**: REST API (Node.js/Express, hosted on EC2)
+- **Backend**: REST API (Symfony, hosted on EC2)
 
 ## 📦 Setup
 
