@@ -45,22 +45,20 @@ export default function Dashboard() {
       },
     });
 
-  const getUpcomingAppointments = (): Appointment[] => {
-    const now = new Date();
-    return appointments
-      .filter(
-        (appointment: Appointment) => new Date(appointment.startTime) > now
-      )
-      .sort(
-        (a: Appointment, b: Appointment) =>
-          new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
-      )
-      .slice(0, 3);
-  };
-
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
     return format(date, "MMM d, yyyy h:mm a");
+  };
+
+  const getUpcomingAppointments = (): Appointment[] => {
+    const now = new Date();
+    return appointments
+      .filter((a) => new Date(a.startTime) > now)
+      .sort(
+        (a, b) =>
+          new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+      )
+      .slice(0, 3);
   };
 
   const upcomingAppointments = getUpcomingAppointments();
@@ -104,15 +102,12 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
             <Button
-              onClick={() => navigate("/appointments/new")}
+              onClick={() => navigate("/appointments")}
               disabled={participants.length === 0}
             >
               New Appointment
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate("/participants/new")}
-            >
+            <Button variant="outline" onClick={() => navigate("/participants")}>
               Add Participant
             </Button>
           </CardContent>
@@ -138,8 +133,8 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="space-y-4">
-                {upcomingAppointments.map((appointment: Appointment) => (
-                  <Card key={appointment.id} className="appointment-card">
+                {upcomingAppointments.map((appointment) => (
+                  <Card key={appointment.id}>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-lg">
                         {appointment.title}
@@ -151,15 +146,9 @@ export default function Dashboard() {
                     </CardHeader>
                     <CardContent className="pb-2">
                       <div className="flex flex-wrap gap-1">
-                        {appointment.participants.map((p) => (
-                          <Badge
-                            key={p.id}
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {p.name}
-                          </Badge>
-                        ))}
+                        <Badge variant="outline" className="text-xs">
+                          {appointment.participant.name}
+                        </Badge>
                       </div>
                     </CardContent>
                   </Card>
@@ -196,7 +185,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="space-y-2">
-                {participants.slice(0, 5).map((participant: Participant) => (
+                {participants.slice(0, 5).map((participant) => (
                   <div
                     key={participant.id}
                     className="p-2 border rounded-md flex justify-between items-center"

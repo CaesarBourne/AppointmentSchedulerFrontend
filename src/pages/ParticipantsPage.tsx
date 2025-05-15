@@ -5,26 +5,28 @@ import { type Participant, type NewParticipant } from "@/models/Participant";
 import {
   getParticipants,
   createParticipant,
-  updateParticipant,
   deleteParticipant,
 } from "@/services/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 export default function ParticipantsPage() {
   const queryClient = useQueryClient();
   const [editingParticipant, setEditingParticipant] =
     useState<Participant | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("list");
+  const [activeTab, setActiveTab] = useState("list");
 
-  // Fetch participants
   const { data: participants = [], isLoading } = useQuery<Participant[]>({
     queryKey: ["participants"],
     queryFn: getParticipants,
   });
 
-  // Create participant
   const createMutation = useMutation({
     mutationFn: createParticipant,
     onSuccess: () => {
@@ -37,22 +39,6 @@ export default function ParticipantsPage() {
     },
   });
 
-  // Update participant
-  const updateMutation = useMutation({
-    mutationFn: (data: { id: number; values: NewParticipant }) =>
-      updateParticipant({ id: data.id, ...data.values }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["participants"] });
-      toast.success("Participant updated successfully");
-      setEditingParticipant(null);
-      setActiveTab("list");
-    },
-    onError: () => {
-      toast.error("Failed to update participant");
-    },
-  });
-
-  // delete participant
   const deleteMutation = useMutation({
     mutationFn: deleteParticipant,
     onSuccess: () => {
@@ -68,23 +54,15 @@ export default function ParticipantsPage() {
     createMutation.mutate(participant);
   };
 
-  const handleUpdateParticipant = async (participant: NewParticipant) => {
-    if (!editingParticipant) return;
-    updateMutation.mutate({
-      id: editingParticipant.id,
-      values: participant,
-    });
-  };
-
   const handleEditParticipant = (participant: Participant) => {
     setEditingParticipant(participant);
     setActiveTab("edit");
   };
 
-  const handleCancelEdit = () => {
-    setEditingParticipant(null);
-    setActiveTab("list");
-  };
+  // const handleCancelEdit = () => {
+  //   setEditingParticipant(null);
+  //   setActiveTab("list");
+  // };
 
   const handleDeleteParticipant = (id: number) => {
     deleteMutation.mutate(id);
@@ -100,9 +78,17 @@ export default function ParticipantsPage() {
             <TabsTrigger value="list">Participant List</TabsTrigger>
             <TabsTrigger value="add">Add Participant</TabsTrigger>
             {editingParticipant && (
-              <TabsTrigger value="edit">Edit Participant</TabsTrigger>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger value="edit">Edit Participant</TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Editing not yet supported in backend
+                </TooltipContent>
+              </Tooltip>
             )}
           </TabsList>
+
           <TabsContent value="list" className="pt-4">
             {isLoading ? (
               <div className="flex justify-center py-8">
@@ -117,20 +103,18 @@ export default function ParticipantsPage() {
               />
             )}
           </TabsContent>
+
           <TabsContent value="add" className="pt-4 flex justify-center">
             <ParticipantForm
               onSubmit={handleAddParticipant}
               onCancel={() => setActiveTab("list")}
             />
           </TabsContent>
+
           <TabsContent value="edit" className="pt-4 flex justify-center">
-            {editingParticipant && (
-              <ParticipantForm
-                onSubmit={handleUpdateParticipant}
-                initialParticipant={editingParticipant}
-                onCancel={handleCancelEdit}
-              />
-            )}
+            <div className="text-muted-foreground text-center text-sm italic">
+              Edit is not yet supported in the backend.
+            </div>
           </TabsContent>
         </Tabs>
       </div>
